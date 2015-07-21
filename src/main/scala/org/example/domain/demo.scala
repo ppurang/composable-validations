@@ -3,6 +3,16 @@ package org.example.domain
 import scalaz.\/
 import scalaz.syntax.either._
 import scalaz.syntax.std.boolean._
+import common._
+
+case class User(id: ID, email: Email)
+
+object User {
+
+  def validate: User => (String or User) = ???
+
+}
+
 
 case class Email(email: String)
 
@@ -23,12 +33,8 @@ object Email {
 case class ID(id: String)
 
 object ID {
-
-  type or[+A, +B] = \/[A, B]
-
   implicit def validate: ID => String or ID = id => (id.id.length > 0).fold(
     id.right,
     s"IDs can't be empty: '${id.id}'".left
   )
-
 }
