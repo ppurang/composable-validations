@@ -6,26 +6,14 @@ import common._
 case class User(id: ID, email: Email)
 
 object User {
+  //cue: talk about alternatives User.apply or (_,_) =>
+  def validate : User => (String or User) = u =>
+    (ID.validate(u.id).validation.toValidationNel
+      |@| Email.validate(u.email).validation.toValidationNel)(
 
-  //cue: console it! again
-  def validate : User => (String or User) = u => (
+        (_, _) => u
 
-    Email.validate(u.email).validation.toValidationNel  <*> (
-
-      ID.validate(u.id).validation.toValidationNel map (
-
-        (User.apply _) curried)
-
-      )
-
-    ).disjunction.leftMap(_.toString)
-
-
-  def validate2 : User => (String or User) = u =>  for {
-    id <- ID.validate(u.id)
-    email <- Email.validate(u.email)
-  } yield User(id, email)
-
+      ).disjunction.leftMap(_.toString)
 }
 
 
