@@ -2,6 +2,7 @@ package org.example.domain
 
 import scalaz.\/
 import scalaz.syntax.either._
+import scalaz.syntax.applicative._
 import scalaz.syntax.std.boolean._
 import common._
 
@@ -9,7 +10,11 @@ case class User(id: ID, email: Email)
 
 object User {
 
-  def validate: User => (String or User) = ???
+  def validate: User => (String or User) =
+    u =>
+      //cue: <*> what matters below?
+      Email.validate(u.email) <*> ( ID.validate(u.id) map ( (User.apply _) curried ) )
+  
 
 }
 
