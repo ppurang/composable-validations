@@ -10,15 +10,15 @@ object User {
   //cue: console it! again
   def validate : User => (String or User) = u => (
 
-    Email.validate(u.email).validation  <*> (
+    Email.validate(u.email).validation.toValidationNel  <*> (
 
-      ID.validate(u.id).validation map (
+      ID.validate(u.id).validation.toValidationNel map (
 
         (User.apply _) curried)
 
       )
 
-    ).disjunction
+    ).disjunction.leftMap(_.toString)
 
 
   def validate2 : User => (String or User) = u =>  for {
