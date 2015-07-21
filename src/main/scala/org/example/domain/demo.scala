@@ -10,11 +10,13 @@ case class User(id: ID, email: Email)
 
 object User {
 
-  def validate: User => (String or User) =
-    u =>
-      //cue: <*> what matters below?
-      Email.validate(u.email) <*> ( ID.validate(u.id) map ( (User.apply _) curried ) )
-  
+  //cue: where's da console at
+  def validate : User => (String or User) = u => Email.validate(u.email)  <*> (ID.validate(u.id) map ((User.apply _) curried))
+
+  def validate2 : User => (String or User) = u =>  for {
+    id <- ID.validate(u.id)
+    email <- Email.validate(u.email)
+  } yield User(id, email)
 
 }
 
