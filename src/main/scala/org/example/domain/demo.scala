@@ -1,17 +1,25 @@
 package org.example.domain
 
-import scalaz.\/
-import scalaz.syntax.either._
-import scalaz.syntax.applicative._
-import scalaz.syntax.std.boolean._
+import scalaz._, Scalaz._
 import common._
 
 case class User(id: ID, email: Email)
 
 object User {
 
-  //cue: where's da console at
-  def validate : User => (String or User) = u => Email.validate(u.email)  <*> (ID.validate(u.id) map ((User.apply _) curried))
+  //cue: console it! again
+  def validate : User => (String or User) = u => (
+
+    Email.validate(u.email).validation  <*> (
+
+      ID.validate(u.id).validation map (
+
+        (User.apply _) curried)
+
+      )
+
+    ).disjunction
+
 
   def validate2 : User => (String or User) = u =>  for {
     id <- ID.validate(u.id)
