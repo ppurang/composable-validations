@@ -2,26 +2,60 @@ package org.example.domain
 
 import java.util.Locale
 
-import org.example.validation
-import org.example.validation._
-
+import org.example.validation, validation._
 import scalaz._, Scalaz._
 import common._
 import argonaut._, Argonaut._
 import CodecHelper._
 
-case class User(id: ID, mfn: Maybe[FirstName], email: Email, addresses: Vector[Address])
+case class ID(id: String)
+
+object ID {
+  implicit def validate: ID => String or ID = id => (id.id.length > 0).fold(
+    id.right,
+    s"IDs can't be empty: '${id.id}'".left
+  )
+
+  implicit val idCodec: CodecJson[ID] = codec(
+    _.id,
+    ID(_))
+
+  val idErrorCode: ErrorCode = "invalid-id"
+
+  implicit def validate2 : ID => \/[(ErrorCode, String), ID] = validate(_).leftMap((idErrorCode, _))
+
+  implicit val equals = Equal.equalA[ID]
+
+}
+
+case class User(id: ID, mfn: Maybe[FirstName], email: Email, defaultAddress: Maybe[ID], addresses: Vector[Address])
 
 object User {
   val idField = "user_id"
   val firstNameField = "user_first_name"
   val emailField = "user_email"
   val addressesField = "user_address"
+  val defaultAddressField = "user_default_address"
 
-  implicit val userCodec : CodecJson[User] = casecodec4(User.apply, User.unapply)(idField, firstNameField, emailField, addressesField)
+  implicit val userCodec : CodecJson[User] = casecodec5(User.apply, User.unapply)(idField, firstNameField, emailField, defaultAddressField, addressesField)
 
+  val defaultAddrNotInAddresses: ErrorCode = "user-default-address-invalid"
 
-  def validateUser(user: User)(implicit mparent: Maybe[ErrorField] = ErrorField("user").just) : ValidationNel[Error, User @@ Valid] = (validate(idField)(user.id) |@| validateMaybe(firstNameField)(user.mfn) |@| validate(emailField)(user.email) |@| validateMultipleAccumulate(addressesField)(user.addresses) )((_,_,_,_) => Tag(user) )
+  def validateDefaultAddress: Maybe[ErrorField] => (Maybe[ID], Vector[Address]) => \/[Error, Maybe[ID]] = implicit parent => (defaultAddress, addresses) => {
+    (defaultAddress.map(id => addresses.exists(_.id === id)) | true).fold(defaultAddress.right,
+      Error(defaultAddrNotInAddresses, ErrorField(defaultAddressField).mParent(parent), s"""The default address id '${defaultAddress.map(_.id) | ""}'  wasn't part of the addresses: ${addresses.map(_.id.id).mkString(",")}""").left
+    )
+  }
+
+  def validateUser(user: User)(implicit mparent: Maybe[ErrorField] = ErrorField("user").just) : ValidationNel[Error, User @@ Valid] = (
+    validate(idField)(user.id) |@|
+      validateMaybe(firstNameField)(user.mfn) |@|
+      validate(emailField)(user.email) |@|
+      validateMultipleAccumulate(addressesField)(user.addresses) |@|
+      validateMaybe(defaultAddressField)(user.defaultAddress) |@|
+      validateDefaultAddress(mparent)(user.defaultAddress, user.addresses).validation.toValidationNel
+    )((_,_,_,_,_,_) => Tag(user) )
+
 
 }
 
@@ -70,23 +104,6 @@ object Email {
 
 }
 
-case class ID(id: String)
-
-object ID {
-  implicit def validate: ID => String or ID = id => (id.id.length > 0).fold(
-    id.right,
-    s"IDs can't be empty: '${id.id}'".left
-  )
-
-  implicit val idCodec: CodecJson[ID] = codec(
-    _.id,
-    ID(_))
-
-  val idErrorCode: ErrorCode = "invalid-id"
-
-  implicit def validate2 : ID => \/[(ErrorCode, String), ID] = validate(_).leftMap((idErrorCode, _))
-
-}
 
 case class Address(id: ID, addressedTo: Maybe[String], street: String, city: String, country: Country)
 

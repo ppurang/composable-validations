@@ -32,7 +32,7 @@ case class ErrorField(field: String) {
 object ErrorField {
   val emptyField = ErrorField("")
 
-  implicit val strToAPIField : String => ErrorField = ErrorField(_)
+  implicit val strToErrorField : String => ErrorField = ErrorField(_)
 
   implicit val afcodec: CodecJson[ErrorField] = codec(
     _.field,

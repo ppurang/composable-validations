@@ -32,8 +32,9 @@ initialCommands in console :=
     |val iaddress = Address(iaddress_id, iaddressedTo.just, istreet, icity, icountry)
     |
     |
-    |val user = User(vid, FirstName("first-name").just, vemail, Vector(vaddress))
-    |val nuser = User(ivid, FirstName("").just, ivemail, Vector(iaddress))
+    |val user = User(vid, FirstName("first-name").just, vemail, vaddress_id.just, Vector(vaddress))
+    |val userIDA = User(vid, FirstName("first-name").just, vemail, ID("invalid-address-id").just, Vector(vaddress))
+    |val nuser = User(ivid, FirstName("").just, ivemail, iaddress_id.just, Vector(iaddress))
     |
     |import User._
     |
