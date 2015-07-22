@@ -118,11 +118,11 @@ object Address {
   val streetInvalidErrorCode = "street-invalid"
   val cityInvalidErrorCode = "city-invalid"
 
-  implicit def validate2: Maybe[ErrorField] => Address => ValidationNel[Error, Address] = implicit parent => ad => (
-    validation.validate(idField)(ad.id) |@|
-      validation.validateMaybeString(addressedToInvalidErrorCode, addressedToField, s"Addressed-to '${ad.addressedTo}' is empty.")(ad.addressedTo)() |@|
-      validation.validateString(streetInvalidErrorCode, streetField, s"Street '${ad.street}' is empty.")(ad.street)() |@|
-      validation.validateString(streetInvalidErrorCode, cityField, s"City '${ad.city}' is empty.")(ad.city)() |@|
+  implicit def validate2: Maybe[ErrorField] => Address => ValidationNel[Error, Address] = implicit parent => ad =>
+    V.apply5(validation.validate(idField)(ad.id),
+      validation.validateMaybeString(addressedToInvalidErrorCode, addressedToField, s"Addressed-to '${ad.addressedTo}' is empty.")(ad.addressedTo)(),
+      validation.validateString(streetInvalidErrorCode, streetField, s"Street '${ad.street}' is empty.")(ad.street)(),
+      validation.validateString(streetInvalidErrorCode, cityField, s"City '${ad.city}' is empty.")(ad.city)(),
       validation.validate(countryField)(ad.country))(
       (_, _, _, _, _) => ad
     )

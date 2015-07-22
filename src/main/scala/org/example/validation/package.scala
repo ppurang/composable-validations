@@ -4,6 +4,10 @@ import scalaz._, Scalaz._
 
 package object validation {
 
+  type NELError[A] = ValidationNel[Error, A]
+
+  val V = Applicative[NELError]
+
   trait Valid
 
   def validate[A, B](field: ErrorField)(a: A)(implicit parent: Maybe[ErrorField], v: A => \/[(ErrorCode, String), B]) : ValidationNel[Error, B] =  {
