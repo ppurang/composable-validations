@@ -34,6 +34,7 @@ initialCommands in console :=
     |
     |val user = User(vid, FirstName("first-name").just, vemail, vaddress_id.just, Vector(vaddress))
     |val userIDA = User(vid, FirstName("first-name").just, vemail, ID("invalid-address-id").just, Vector(vaddress))
+    |val userIAddresses = User(vid, FirstName("first-name").just, vemail, ID("invalid-address-id").just, Vector(vaddress, vaddress.copy(id = ID(""))))
     |val nuser = User(ivid, FirstName("").just, ivemail, iaddress_id.just, Vector(iaddress))
     |
     |import User._
