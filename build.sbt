@@ -12,6 +12,8 @@ initialCommands in console :=
     |import org.example.domain._
     |import scalaz._, Scalaz._
     |import argonaut._, Argonaut._
+    |import org.example.validation._
+    |import User._
     |
     |val vid = ID("u-1")
     |val vaddress_id = ID("add-1")
@@ -37,7 +39,6 @@ initialCommands in console :=
     |val userIAddresses = User(vid, FirstName("first-name").just, vemail, ID("invalid-address-id").just, Vector(vaddress, vaddress.copy(id = ID(""))))
     |val nuser = User(ivid, FirstName("").just, ivemail, iaddress_id.just, Vector(iaddress))
     |
-    |import User._
     |
     |
   """.stripMargin
