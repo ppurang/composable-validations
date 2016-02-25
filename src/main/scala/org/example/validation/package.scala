@@ -29,10 +29,10 @@ package object validation {
   def validateMaybeAccumulate[A, B](field: ErrorField)(a: Maybe[A])(implicit parent: Maybe[ErrorField], v: Maybe[ErrorField] => A => ValidationNel[Error, B]): ValidationNel[Error, Maybe[B]] = a.traverseU(v(parent.map(field.parent))(_))
 
   def validateMultipleAccumulate[A, B](field: ErrorField)(as: Vector[A])(implicit parent: Maybe[ErrorField], v: Maybe[ErrorField] => A => ValidationNel[Error, B]): ValidationNel[Error, Vector[B]] = {
-    as.zipWithIndex.map(t => v(parent.map(field.parent(_).withIndex(t._2)))(t._1)).sequenceU
+    as.zipWithIndex.traverseU(t => v(parent.map(field.parent(_).withIndex(t._2)))(t._1))
   }
 
-  def validateMultiple[A, B](field: ErrorField)(as: Vector[A])(implicit parent: Maybe[ErrorField], v: A => \/[(ErrorCode, String), B]): ValidationNel[Error, Vector[B]] = as.zipWithIndex.map(t => validate(field.withIndex(t._2))(t._1)).sequenceU
+  def validateMultiple[A, B](field: ErrorField)(as: Vector[A])(implicit parent: Maybe[ErrorField], v: A => \/[(ErrorCode, String), B]): ValidationNel[Error, Vector[B]] = as.zipWithIndex.traverseU(t => validate(field.withIndex(t._2))(t._1))
 
 
   def validateString(code: ErrorCode, field: ErrorField, msg: String)(str: String)(p: String => Boolean = _.trim.nonEmpty)(implicit parent: Maybe[ErrorField]) : ValidationNel[Error, String]
