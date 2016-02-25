@@ -3,7 +3,7 @@ name := "validations"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-   "org.scalaz" %% "scalaz-core" % "7.1.3",
+   "org.scalaz" %% "scalaz-core" % "7.1.7",
    "io.argonaut" %% "argonaut" % "6.1"
 )
 
